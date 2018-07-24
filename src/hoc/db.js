@@ -4,17 +4,29 @@ import { updateChatMessages } from '../actions';
 import firebase from '../firebase';
 
 
-import { cpus } from 'os';
 export default (WrappedComponent) => {
     class Db extends Component {
+
+        dbRef = firebase.collection('chat-log');
+
         componentDidMount() {
             //console.log('HOC DB LOADED');
-            firebase.collection('chat-log').onSnapshot(this.props.updateChatMessages);
-            
+            //firebase.collection('chat-log').onSnapshot(this.props.updateChatMessages);
+            this.dbRef.orderBy('timestamp', 'desc').onSnapshot(this.props.updateChatMessages);
+        }
+        sendMessage = (msg)=> {
+            console.log('from db hoc', msg);
+            const newMsg = {
+                name: 'Jake', 
+                message: msg,
+                timestamp: new Date().getTime()
+            };
+
+            this.dbRef.add(newMsg);
         }
 
         render() {
-            return < WrappedComponent {...this.props}/>
+            return < WrappedComponent {...this.props} sendMessage={this.sendMessage}/>
         }
     }//end class Db
 
